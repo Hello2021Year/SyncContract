@@ -44,20 +44,24 @@ def validate_param(request, kwargs):
                 raise ValueError(f'{i} 参数是必需的')
 
     # 拼接请求参数
-    for i in request_args:
-        if exclude_args is None:
-           params.append((i,request_args.get(i)))
-        else:
-           if i in exclude_args:
-               continue
+    if request_args is not None:
+        for i in request_args:
+            if exclude_args is None:
+               params.append((i, request_args.get(i)))
+            else:
+                if i in exclude_args:
+                    continue
+                params.append((i, request_args.get(i)))
+
 
 
     if extra_args is not None:
         for key in extra_args:
             params.append((key,extra_args.get(key)))
 
-    for i in request_json:
-        data[i] = request_json.get(i)
+    if request_json is not None:
+        for i in request_json:
+            data[i] = request_json.get(i)
 
     return params,json.dumps(data)
 
