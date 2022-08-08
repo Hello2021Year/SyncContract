@@ -6,6 +6,7 @@ from flask import Flask, request
 from sync_ethContract.conf.Config import Config
 from sync_ethContract.utils.utils import build_header_masterKey
 from sync_ethContract.utils.utils import builder_header_apiKey
+from sync_ethContract.utils.utils import builder_header_trigger
 from sync_ethContract.utils.validate import validate_param
 
 app = Flask(__name__)
@@ -19,6 +20,11 @@ config = Config()
 
 @app.route('/index')
 def hello_world():
+    return 'Hello World!'
+
+@app.route('/after')
+def test():
+    print(request)
     return 'Hello World!'
 
 
@@ -120,6 +126,9 @@ def get_log_address():
     return response.content
 
 
+
+
+
 @app.route('/addSyncContract', methods=['POST'])
 def add_Sync_contract():
     """
@@ -165,7 +174,14 @@ def add_Sync_contract():
                              headers=headers, params=params, data=data)
 
     # 返回结果
-    return response.content
+    #return response.content
+
+    # 添加一个合约以后执行webhook afterSave操作
+    headers = builder_header_trigger(config)
+    data = '{"className": request.args.get("tableName"), "triggerName": "afterSave", "url": "https://localhost:5000/aftersave"}'
+
+    response = requests.post(config.api_url, headers=headers, data=data)
+    return response
 
 
 
