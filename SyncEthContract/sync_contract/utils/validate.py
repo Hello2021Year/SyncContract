@@ -1,5 +1,6 @@
 import json
 
+
 def request_parse(req_data):
     """
     解析传入的参数
@@ -10,7 +11,7 @@ def request_parse(req_data):
     args_data = req_data.args
     json_data = req_data.json
 
-    return args_data,json_data
+    return args_data, json_data
 
 
 # 参数校验
@@ -23,16 +24,16 @@ def validate_param(request, kwargs):
     :param required_json: 必须的json参数
     :return: http请求的参数
     '''
-    request_args,request_json = request_parse(request)
+    request_args, request_json = request_parse(request)
 
     params = []
     data = dict()
 
     # 校验参数
-    required_json = kwargs.get('required_json',None)
-    required_args = kwargs.get('required_args',None)
-    exclude_args = kwargs.get('exclude_args',None)
-    extra_args = kwargs.get('extra_args',None)
+    required_json = kwargs.get('required_json', None)
+    required_args = kwargs.get('required_args', None)
+    exclude_args = kwargs.get('exclude_args', None)
+    extra_args = kwargs.get('extra_args', None)
 
     if required_args is not None:
         for i in required_args:
@@ -47,25 +48,18 @@ def validate_param(request, kwargs):
     if request_args is not None:
         for i in request_args:
             if exclude_args is None:
-               params.append((i, request_args.get(i)))
+                params.append((i, request_args.get(i)))
             else:
                 if i in exclude_args:
                     continue
                 params.append((i, request_args.get(i)))
 
-
-
     if extra_args is not None:
         for key in extra_args:
-            params.append((key,extra_args.get(key)))
+            params.append((key, extra_args.get(key)))
 
     if request_json is not None:
         for i in request_json:
             data[i] = request_json.get(i)
 
-    return params,json.dumps(data)
-
-
-
-
-
+    return params, json.dumps(data)
