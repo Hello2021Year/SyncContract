@@ -1,5 +1,5 @@
-from sync_ethContract.conf.Parse import Parse
-from sync_ethContract.db import mongodb_connect
+from sync_contract.conf.Parse import Parse
+from sync_contract.db import mongodb_connect
 
 
 class Config(object):
@@ -9,7 +9,7 @@ class Config(object):
         init conf
         """
 
-        self.conf_file = "sync_ethContract/conf/Config.ini"
+        self.conf_file = "sync_contract/conf/Config.ini"
         self.cfg = Parse(self.conf_file)
         self.cfg.init()
         self.module_name = ['Moralis', "Atalas_mongo","Moralis_mongo","Webhook"]

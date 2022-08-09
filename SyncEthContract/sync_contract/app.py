@@ -3,11 +3,11 @@
 import requests
 from flask import Flask, request
 
-from sync_ethContract.conf.Config import Config
-from sync_ethContract.utils.utils import build_header_masterKey
-from sync_ethContract.utils.utils import builder_header_apiKey
-from sync_ethContract.utils.utils import builder_header_trigger
-from sync_ethContract.utils.validate import validate_param
+from sync_contract.conf.Config import Config
+from sync_contract.utils.utils import build_header_masterKey
+from sync_contract.utils.utils import builder_header_apiKey
+from sync_contract.utils.utils import builder_header_hook
+from sync_contract.utils.validate import validate_param
 
 app = Flask(__name__)
 
@@ -27,6 +27,49 @@ def test():
     print(request)
     return 'Hello World!'
 
+@app.route('/getHooks',methods=['GET'])
+def get_hooks():
+    headers = builder_header_hook(config)
+    response = requests.get('{}/hooks/triggers'.format(config.request_url), headers=headers)
+    return response.content
+
+@app.route('/createHooks', methods=['POST'])
+def create_hooks():
+    headers = builder_header_hook(config)
+    kwargs = dict()
+    required_json = ["className", "triggerName",'url']
+    kwargs['required_json'] = required_json
+    _,data = validate_param(request,kwargs)
+    # to do 校验className是否合法
+    # 校验triggerName是否合法
+    response = requests.post('{}/hooks/functions'.format(config.request_url), headers=headers, data=data)
+    return response.content
+
+@app.route('/editHooks', methods=['PUT'])
+def edit_hooks():
+    headers = builder_header_hook(config)
+    kwargs = dict()
+    required_json = ['url']
+    kwargs['required_json'] = required_json
+    _,data = validate_param(request,kwargs)
+    data = data.lstrip('{').rstrip('}')
+    className = data.split('/')[3]
+    trigger = data['url']
+    response = requests.put('{}/hooks/triggers/{}/{}'.format(config.request_url,className,trigger), headers=headers, data=data)
+    return response.content
+
+@app.route('/deleteHooks', methods=['PUT'])
+def delete_hooks():
+    headers = builder_header_hook(config)
+    kwargs = dict()
+    required_params = ['className',"triggerName"]
+    kwargs['required_json'] = required_params
+    params,_ = validate_param(request,kwargs)
+    className = required_params.get("className")
+    trigger = required_params.get("triggerName")
+    data = '{ "__op": "Delete" }'
+    response = requests.put('{}/hooks/triggers/{}/{}'.format(config.request_url,className,trigger), headers=headers, data=data)
+    return response.content
 
 @app.route('/getContractEvents', methods=['POST'])
 def get_contract_event():
@@ -77,7 +120,7 @@ def get_contract_event():
     # 返回结果
     return response.content
 
-@app.route('/getLogsByAddress', methods=['POST'])
+@app.route('/getLogsByAddress', methods=['GET'])
 def get_log_address():
     """
     Get the events by given address
@@ -119,7 +162,7 @@ def get_log_address():
 
 
     # 执行函数
-    response = requests.post("{}/{}/logs".format(config.api_url,request.args.get('address')),
+    response = requests.get("{}/{}/logs".format(config.api_url,request.args.get('address')),
                              headers=headers, params=params, data=data)
 
     # 返回结果
@@ -174,15 +217,7 @@ def add_Sync_contract():
                              headers=headers, params=params, data=data)
 
     # 返回结果
-    #return response.content
-
-    # 添加一个合约以后执行webhook afterSave操作
-    headers = builder_header_trigger(config)
-    data = '{"className": request.args.get("tableName"), "triggerName": "afterSave", "url": "https://localhost:5000/aftersave"}'
-
-    response = requests.post(config.api_url, headers=headers, data=data)
-    return response
-
+    return response.content
 
 
 

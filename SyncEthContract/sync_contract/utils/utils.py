@@ -20,9 +20,9 @@ def builder_header_apiKey(api_key):
                }
     return headers
 
-def builder_header_trigger(config):
+def builder_header_hook(config):
     headers =   {
-                'X-Parse-Application-Id': config.api_key,
+                'X-Parse-Application-Id': config.application_id,
                 'X-Parse-Master-Key': config.master_key,
                 'Content-Type': 'application/json'
                 }
